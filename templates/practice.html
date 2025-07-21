@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Practice Questions - Interview Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-dumbbell me-2"></i>Practice Interview Questions
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Category Selection -->
+                <div class="mb-4">
+                    <label class="form-label">Select Category:</label>
+                    <div class="btn-group d-flex" role="group">
+                        <a href="{{ url_for('practice', category='Technical') }}" 
+                           class="btn btn-outline-primary {{ 'active' if category == 'Technical' else '' }}">
+                            Technical
+                        </a>
+                        <a href="{{ url_for('practice', category='Behavioral') }}" 
+                           class="btn btn-outline-primary {{ 'active' if category == 'Behavioral' else '' }}">
+                            Behavioral
+                        </a>
+                        <a href="{{ url_for('practice', category='HR') }}" 
+                           class="btn btn-outline-primary {{ 'active' if category == 'HR' else '' }}">
+                            HR
+                        </a>
+                        <a href="{{ url_for('practice', category='Situational') }}" 
+                           class="btn btn-outline-primary {{ 'active' if category == 'Situational' else '' }}">
+                            Situational
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Practice Question -->
+                <div class="question-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        {{ category }} Practice Question
+                    </h5>
+                    <p class="fs-5 fw-bold" id="currentQuestion">{{ question }}</p>
+                </div>
+                
+                <!-- Answer Area -->
+                <div class="mt-4">
+                    <label for="answer" class="form-label">Your Answer:</label>
+                    <textarea class="form-control" id="answer" rows="6" 
+                            placeholder="Type your answer here..."></textarea>
+                    <div class="form-text">
+                        Take your time to think and provide a detailed answer. Practice speaking it out loud too!
+                    </div>
+                    <div class="mt-2">
+                        <small id="wordCount" class="text-muted">0 words</small>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-4 text-center">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-success" onclick="window.location.reload()">
+                            <i class="fas fa-refresh me-2"></i>New Question
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="getAnswerHelp()">
+                            <i class="fas fa-lightbulb me-2"></i>Get Answer Help
+                        </button>
+                        <button type="button" class="btn btn-info" id="timerBtn" onclick="toggleTimer()">
+                            <i class="fas fa-clock me-2"></i>Start Timer
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="generateNewQuestion()">
+                            <i class="fas fa-random me-2"></i>Random Question
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Timer Display -->
+                <div class="mt-3 text-center">
+                    <div id="timer" class="fs-4 fw-bold text-primary" style="display: none;">00:00</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tips Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-star me-2"></i>{{ category }} Interview Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if category == 'Technical' %}
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Think out loud while solving
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Ask clarifying questions
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Explain your approach first
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Consider edge cases
+                            </li>
+                        </ul>
+                    </div>
+                    {% elif category == 'Behavioral' %}
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Use the STAR method
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Be specific with examples
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Show growth and learning
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Quantify your impact
+                            </li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Practice out loud
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Time your responses
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Use specific examples
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Stay confident and calm
+                            </li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let timerInterval;
+let seconds = 0;
+let isTimerRunning = false;
+
+// Word count functionality
+document.getElementById('answer').addEventListener('input', function() {
+    const text = this.value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    document.getElementById('wordCount').textContent = `${words} words`;
+});
+
+// Timer functionality
+function toggleTimer() {
+    const timerElement = document.getElementById('timer');
+    const timerBtn = document.getElementById('timerBtn');
+    
+    if (!isTimerRunning) {
+        // Start timer
+        timerElement.style.display = 'block';
+        seconds = 0;
+        isTimerRunning = true;
+        
+        timerInterval = setInterval(() => {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            timerElement.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }, 1000);
+        
+        timerBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Timer';
+        timerBtn.classList.remove('btn-info');
+        timerBtn.classList.add('btn-danger');
+    } else {
+        // Stop timer
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        
+        timerBtn.innerHTML = '<i class="fas fa-clock me-2"></i>Start Timer';
+        timerBtn.classList.remove('btn-danger');
+        timerBtn.classList.add('btn-info');
+    }
+}
+
+// Get answer help
+function getAnswerHelp() {
+    const question = document.getElementById('currentQuestion').textContent;
+    const category = "{{ category }}";
+    
+    // Create form and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ url_for("get_answer_help") }}';
+    
+    const questionInput = document.createElement('input');
+    questionInput.type = 'hidden';
+    questionInput.name = 'question';
+    questionInput.value = question;
+    
+    const categoryInput = document.createElement('input');
+    categoryInput.type = 'hidden';
+    categoryInput.name = 'category';
+    categoryInput.value = category;
+    
+    form.appendChild(questionInput);
+    form.appendChild(categoryInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Generate new question via API
+function generateNewQuestion() {
+    const category = "{{ category }}";
+    const questionElement = document.getElementById('currentQuestion');
+    
+    // Show loading
+    questionElement.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating new question...';
+    
+    // Simulate API call (in real implementation, you'd call your backend)
+    setTimeout(() => {
+        window.location.href = `{{ url_for('practice') }}?category=${category}&refresh=1`;
+    }, 1000);
+}
+
+// Auto-save answer to localStorage
+document.getElementById('answer').addEventListener('input', function() {
+    localStorage.setItem('practiceAnswer_{{ category }}', this.value);
+});
+
+// Load saved answer on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedAnswer = localStorage.getItem('practiceAnswer_{{ category }}');
+    if (savedAnswer) {
+        document.getElementById('answer').value = savedAnswer;
+        // Trigger word count update
+        document.getElementById('answer').dispatchEvent(new Event('input'));
+    }
+});
+</script>
+{% endblock %}

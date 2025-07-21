@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}AI Response - Interview Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Question Display -->
+        <div class="question-card">
+            <h5 class="mb-2">
+                <i class="fas fa-question-circle text-primary me-2"></i>Your Question
+            </h5>
+            <p class="mb-1"><strong>{{ question }}</strong></p>
+            <small class="text-muted">Category: {{ category }}</small>
+        </div>
+        
+        <!-- AI Response -->
+        <div class="ai-response">
+            <h5 class="mb-3">
+                <i class="fas fa-robot text-success me-2"></i>AI Assistant Response
+                <button class="btn btn-sm btn-outline-secondary float-end" onclick="copyResponse()">
+                    <i class="fas fa-copy me-1"></i>Copy
+                </button>
+            </h5>
+            <div class="response-content">
+                {{ response|replace('\n', '<br>')|safe }}
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h6>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="askFollowUp()">
+                            <i class="fas fa-plus me-1"></i>Follow-up Question
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success btn-sm w-100" onclick="getMoreExamples()">
+                            <i class="fas fa-list me-1"></i>More Examples
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-info btn-sm w-100" onclick="getRelatedTips()">
+                            <i class="fas fa-lightbulb me-1"></i>Related Tips
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-warning btn-sm w-100" onclick="practiceThis()">
+                            <i class="fas fa-microphone me-1"></i>Practice This
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="text-center mt-4">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('ask_question') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Ask Another Question
+                </a>
+                <a href="{{ url_for('practice') }}" class="btn btn-success">
+                    <i class="fas fa-dumbbell me-2"></i>Practice Questions
+                </a>
+                {% if session.user_id %}
+                <a href="{{ url_for('history') }}" class="btn btn-info">
+                    <i class="fas fa-history me-2"></i>View History
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Related Topics -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Related Topics You Might Ask About
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-decoration-none" onclick="quickAsk('How do I prepare for {{ category.lower() }} interviews?')">{{ category }} interview preparation</a></li>
+                            <li><a href="#" class="text-decoration-none" onclick="quickAsk('What are common {{ category.lower() }} interview mistakes?')">Common {{ category.lower() }} mistakes</a></li>
+                            <li><a href="#" class="text-decoration-none" onclick="quickAsk('How do I follow up after a {{ category.lower() }} interview?')">Follow-up strategies</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-decoration-none" onclick="quickAsk('What body language tips work best in interviews?')">Body language tips</a></li>
+                            <li><a href="#" class="text-decoration-none" onclick="quickAsk('How do I set up for a remote interview?')">Remote interview setup</a></li>
+                            <li><a href="#" class="text-decoration-none" onclick="quickAsk('What questions should I ask the interviewer?')">Questions to ask interviewer</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Question Modal -->
+<div class="modal fade" id="quickQuestionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick AI Response</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="quickQuestionContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Copy response to clipboard
+function copyResponse() {
+    const responseText = document.querySelector('.response-content').innerText;
+    navigator.clipboard.writeText(responseText).then(() => {
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+// Quick ask function
+function quickAsk(question) {
+    const modal = new bootstrap.Modal(document.getElementById('quickQuestionModal'));
+    modal.show();
+    
+    document.getElementById('quickQuestionContent').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Getting AI response...</p>
+        </div>
+    `;
+    
+    fetch('/api/quick_question', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question: question,
+            category: '{{ category }}'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        document.getElementById('quickQuestionContent').innerHTML = `
+            <div class="question-card">
+                <h6 class="text-primary">${data.question}</h6>
+            </div>
+            <div class="ai-response">
+                <div class="response-content">
+                    ${data.response.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+        `;
+    })
+    .catch(error => {
+        document.getElementById('quickQuestionContent').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Error: ${error.message}
+            </div>
+        `;
+    });
+}
+
+// Quick action functions
+function askFollowUp() {
+    const followUpQuestion = prompt("What follow-up question would you like to ask?");
+    if (followUpQuestion) {
+        quickAsk(followUpQuestion);
+    }
+}
+
+function getMoreExamples() {
+    quickAsk(`Can you provide more specific examples for: {{ question }}`);
+}
+
+function getRelatedTips() {
+    quickAsk(`What are some additional tips related to: {{ question }}`);
+}
+
+function practiceThis() {
+    quickAsk(`Give me practice questions similar to: {{ question }}`);
+}
+
+function saveQuickResponse() {
+    // This would save the quick response to the database
+    alert('Quick response saved! (Feature coming soon)');
+}
+</script>
+{% endblock %}

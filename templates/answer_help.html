@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Answer Help - Interview Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Question Display -->
+        <div class="question-card">
+            <h5 class="mb-2">
+                <i class="fas fa-question-circle text-primary me-2"></i>Practice Question
+            </h5>
+            <p class="mb-1"><strong>{{ question }}</strong></p>
+            <small class="text-muted">Category: {{ category }}</small>
+        </div>
+        
+        <!-- AI Help Response -->
+        <div class="ai-response">
+            <h5 class="mb-3">
+                <i class="fas fa-lightbulb text-warning me-2"></i>How to Answer This Question
+            </h5>
+            <div class="response-content">
+                {{ help_response|replace('\n', '<br>')|safe }}
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="text-center mt-4">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('practice') }}" class="btn btn-success">
+                    <i class="fas fa-dumbbell me-2"></i>More Practice Questions
+                </a>
+                <a href="{{ url_for('ask_question') }}" class="btn btn-primary">
+                    <i class="fas fa-question me-2"></i>Ask Another Question
+                </a>
+                <button class="btn btn-info" onclick="practiceAnswer()">
+                    <i class="fas fa-microphone me-2"></i>Practice Your Answer
+                </button>
+            </div>
+        </div>
+        
+        <!-- Practice Answer Section -->
+        <div id="practiceSection" class="card mt-4" style="display: none;">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-microphone me-2"></i>Practice Your Answer
+                </h6>
+            </div>
+            <div class="card-body">
+                <textarea class="form-control mb-3" id="practiceAnswer" rows="6" 
+                        placeholder="Type your practice answer here..."></textarea>
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-outline-primary" onclick="startTimer()">
+                        <i class="fas fa-clock me-1"></i>Start Timer: <span id="timer">00:00</span>
+                    </button>
+                    <button class="btn btn-outline-success" onclick="saveAnswer()">
+                        <i class="fas fa-save me-1"></i>Save Answer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let timerInterval;
+let seconds = 0;
+let isTimerRunning = false;
+
+function practiceAnswer() {
+    const practiceSection = document.getElementById('practiceSection');
+    practiceSection.style.display = practiceSection.style.display === 'none' ? 'block' : 'none';
+}
+
+function startTimer() {
+    if (!isTimerRunning) {
+        isTimerRunning = true;
+        seconds = 0;
+        timerInterval = setInterval(() => {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }, 1000);
+        event.target.innerHTML = '<i class="fas fa-stop me-1"></i>Stop Timer: <span id="timer">00:00</span>';
+    } else {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        event.target.innerHTML = '<i class="fas fa-clock me-1"></i>Start Timer: <span id="timer">00:00</span>';
+    }
+}
+
+function saveAnswer() {
+    const answer = document.getElementById('practiceAnswer').value;
+    if (answer.trim()) {
+        localStorage.setItem('lastPracticeAnswer', answer);
+        alert('Answer saved locally!');
+    } else {
+        alert('Please write an answer first.');
+    }
+}
+
+// Load saved answer if exists
+document.addEventListener('DOMContentLoaded', function() {
+    const savedAnswer = localStorage.getItem('lastPracticeAnswer');
+    if (savedAnswer) {
+        document.getElementById('practiceAnswer').value = savedAnswer;
+    }
+});
+</script>
+{% endblock %}

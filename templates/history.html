@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Question History - Interview Assistant{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-history me-2"></i>Question History
+        </h2>
+    </div>
+</div>
+
+{% if questions %}
+    {% for question in questions %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-secondary">{{ question.category }}</span>
+                <small class="text-muted">{{ question.created_at.strftime('%b %d, %Y at %I:%M %p') }}</small>
+            </div>
+            
+            <h6 class="text-primary mb-2">{{ question.question_text }}</h6>
+            
+            <div class="ai-response">
+                <strong>AI Response:</strong>
+                <p class="mt-2">{{ question.ai_response[:200] }}{% if question.ai_response|length > 200 %}...{% endif %}</p>
+                
+                <button class="btn btn-sm btn-outline-primary" onclick="toggleFullResponse({{ loop.index0 }})">
+                    <span id="toggleText{{ loop.index0 }}">Show Full Response</span>
+                </button>
+                
+                <div id="fullResponse{{ loop.index0 }}" style="display: none;" class="mt-2">
+                    {{ question.ai_response|replace('\n', '<br>')|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-question-circle fa-4x text-muted mb-4"></i>
+        <h4>No questions yet</h4>
+        <p class="text-muted mb-4">You haven't asked any questions yet. Start your interview preparation journey!</p>
+        <a href="{{ url_for('ask_question') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Ask Your First Question
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleFullResponse(index) {
+    const fullResponse = document.getElementById(`fullResponse${index}`);
+    const toggleText = document.getElementById(`toggleText${index}`);
+    
+    if (fullResponse.style.display === 'none') {
+        fullResponse.style.display = 'block';
+        toggleText.textContent = 'Hide Full Response';
+    } else {
+        fullResponse.style.display = 'none';
+        toggleText.textContent = 'Show Full Response';
+    }
+}
+</script>
+{% endblock %}

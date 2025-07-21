@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Ask AI - Interview Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-robot me-2"></i>Ask the AI Interview Assistant
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Question Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="General">General Interview</option>
+                            <option value="Technical">Technical Questions</option>
+                            <option value="Behavioral">Behavioral Questions</option>
+                            <option value="HR">HR Questions</option>
+                            <option value="Situational">Situational Questions</option>
+                            <option value="Career">Career Advice</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="question" class="form-label">Your Question</label>
+                        <textarea class="form-control" id="question" name="question" rows="4" 
+                                placeholder="Ask any interview-related question..." required></textarea>
+                        <div class="form-text">
+                            Examples: "How do I answer 'Tell me about yourself'?", "What are good questions to ask the interviewer?", "How do I explain a gap in my resume?"
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Get AI Response
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Questions -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Questions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="fillQuestion('How do I prepare for a technical interview?')">
+                            Technical Interview Prep
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="fillQuestion('What should I wear to an interview?')">
+                            Interview Attire
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="fillQuestion('How do I negotiate salary?')">
+                            Salary Negotiation
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="fillQuestion('What questions should I ask the interviewer?')">
+                            Questions to Ask
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillQuestion(questionText) {
+    document.getElementById('question').value = questionText;
+}
+</script>
+{% endblock %}
